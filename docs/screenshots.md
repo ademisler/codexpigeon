@@ -4,11 +4,10 @@ CodexPigeon README imagery must be safe to publish.
 
 ## Assets
 
-| Asset                                          | Purpose                     |
-| ---------------------------------------------- | --------------------------- |
-| `docs/assets/hero/codexpigeon-hero.svg`        | Editable README hero source |
-| `docs/assets/hero/codexpigeon-hero.png`        | Rendered README hero        |
-| `docs/assets/screenshots/codexpigeon-demo.png` | Sanitized app screenshot    |
+| Asset                                          | Purpose                  |
+| ---------------------------------------------- | ------------------------ |
+| `docs/assets/hero/codexpigeon-hero.png`        | Rendered README hero     |
+| `docs/assets/screenshots/codexpigeon-demo.png` | Sanitized app screenshot |
 
 ## Demo Mode
 

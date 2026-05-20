@@ -125,6 +125,7 @@ The script creates:
 ~/.local/bin/codexpigeon
 ~/.local/bin/codexpigeon-desktop
 ~/Applications/CodexPigeon.app
+/Applications/CodexPigeon.app     # when /Applications is writable
 ```
 
 The wrappers point at the built Electron entrypoint:

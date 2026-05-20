@@ -150,6 +150,9 @@ Expected:
 [codexpigeon] renderer ready (desktop-api)
 ```
 
+Confirm `CodexPigeon.app` exists in `~/Applications`; when `/Applications` is
+writable, confirm it was copied there too.
+
 ## GitHub Push
 
 After review:

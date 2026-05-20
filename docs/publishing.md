@@ -19,7 +19,6 @@ workspace data in screenshots or docs.
 
 README assets should be safe to publish:
 
-- `docs/assets/hero/codexpigeon-hero.svg`
 - `docs/assets/hero/codexpigeon-hero.png`
 - `docs/assets/screenshots/codexpigeon-demo.png`
 
