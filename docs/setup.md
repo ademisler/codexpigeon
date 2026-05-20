@@ -124,8 +124,8 @@ The script creates:
 ```text
 ~/.local/bin/codexpigeon
 ~/.local/bin/codexpigeon-desktop
-~/Applications/CodexPigeon.app
-/Applications/CodexPigeon.app     # when /Applications is writable
+/Applications/CodexPigeon.app     # preferred when /Applications is writable
+~/Applications/CodexPigeon.app    # fallback when /Applications is not writable
 ```
 
 The wrappers point at the built Electron entrypoint:

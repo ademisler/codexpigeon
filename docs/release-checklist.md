@@ -150,8 +150,9 @@ Expected:
 [codexpigeon] renderer ready (desktop-api)
 ```
 
-Confirm `CodexPigeon.app` exists in `~/Applications`; when `/Applications` is
-writable, confirm it was copied there too.
+Confirm `CodexPigeon.app` exists in `/Applications` when that directory is
+writable, otherwise in `~/Applications`. There should be only one installed app
+bundle with the `dev.codexpigeon.local` bundle identifier.
 
 ## GitHub Push
 

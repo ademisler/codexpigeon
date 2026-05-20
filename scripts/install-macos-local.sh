@@ -19,12 +19,19 @@ desktop_launcher="$HOME/.local/bin/codexpigeon-desktop"
 cli_launcher="$HOME/.local/bin/codexpigeon"
 home_app="$HOME/Applications/CodexPigeon.app"
 system_app="/Applications/CodexPigeon.app"
-app_launcher="$home_app/Contents/MacOS/CodexPigeon"
-resources_dir="$home_app/Contents/Resources"
-plist="$home_app/Contents/Info.plist"
+if [[ -w "/Applications" ]]; then
+  app_dir="$system_app"
+  rm -rf "$home_app"
+else
+  app_dir="$home_app"
+  mkdir -p "$HOME/Applications"
+fi
+app_launcher="$app_dir/Contents/MacOS/CodexPigeon"
+resources_dir="$app_dir/Contents/Resources"
+plist="$app_dir/Contents/Info.plist"
 
-rm -rf "$home_app"
-mkdir -p "$home_app/Contents/MacOS" "$resources_dir"
+rm -rf "$app_dir"
+mkdir -p "$app_dir/Contents/MacOS" "$resources_dir"
 
 cat > "$desktop_launcher" <<EOF
 #!/usr/bin/env bash
@@ -83,11 +90,15 @@ cat > "$plist" <<EOF
   <string>APPL</string>
   <key>CFBundleIdentifier</key>
   <string>dev.codexpigeon.local</string>
+  <key>CFBundleDisplayName</key>
+  <string>CodexPigeon</string>
   <key>CFBundleIconFile</key>
   <string>CodexPigeon</string>
   <key>CFBundleName</key>
   <string>CodexPigeon</string>
   <key>CFBundleShortVersionString</key>
+  <string>0.1.0</string>
+  <key>CFBundleVersion</key>
   <string>0.1.0</string>
   <key>LSMinimumSystemVersion</key>
   <string>13.0</string>
@@ -96,6 +107,8 @@ cat > "$plist" <<EOF
 </dict>
 </plist>
 EOF
+
+printf "APPL????" > "$app_dir/Contents/PkgInfo"
 
 if command -v iconutil >/dev/null 2>&1 && command -v sips >/dev/null 2>&1; then
   icon_source="$repo_root/apps/desktop/assets/codexpigeon.png"
@@ -113,14 +126,13 @@ if command -v iconutil >/dev/null 2>&1 && command -v sips >/dev/null 2>&1; then
   rm -rf "$icon_tmp"
 fi
 
-if [[ -w "/Applications" ]]; then
-  rm -rf "$system_app"
-  ditto "$home_app" "$system_app"
-  echo "Installed macOS app bundle: $system_app"
-else
-  echo "Skipped /Applications install because it is not writable."
+launch_services_register="/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister"
+if [[ -x "$launch_services_register" ]]; then
+  "$launch_services_register" -f "$app_dir" >/dev/null 2>&1 || true
 fi
+xattr -dr com.apple.quarantine "$app_dir" 2>/dev/null || true
+touch "$app_dir"
 
 echo "Installed CodexPigeon desktop launcher: $desktop_launcher"
 echo "Installed CodexPigeon CLI launcher: $cli_launcher"
-echo "Installed macOS app bundle: $home_app"
+echo "Installed macOS app bundle: $app_dir"
