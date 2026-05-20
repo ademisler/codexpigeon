@@ -5,6 +5,25 @@
   "description": "Non-interrupting mailbox companion for Codex threads and worktrees.",
   "license": "MIT",
   "type": "module",
+  "author": "Adem Isler",
+  "homepage": "https://github.com/ademisler/codexpigeon#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ademisler/codexpigeon.git"
+  },
+  "bugs": {
+    "url": "https://github.com/ademisler/codexpigeon/issues"
+  },
+  "keywords": [
+    "codex",
+    "codex-app",
+    "codex-desktop",
+    "mailbox",
+    "electron",
+    "macos",
+    "linux",
+    "agent-tools"
+  ],
   "packageManager": "pnpm@11.1.2",
   "scripts": {
     "dev": "pnpm --filter @codexpigeon/desktop dev",

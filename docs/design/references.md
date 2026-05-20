@@ -13,11 +13,12 @@ CodexPigeon follows the Codex App shell pattern:
 ## Current Reference Set
 
 ```text
-docs/design/references/codex-app/desktop-main-20260520.png
+No publishable Codex App reference screenshots are committed.
 ```
 
-This is the only curated Codex App reference currently in the repository.
-Therefore UI parity claims are limited to the main desktop shell.
+Reference screenshots may be kept locally during design work, but they should
+not be committed unless they are clearly safe to publish and documented here.
+Therefore UI parity claims are limited to broad shell patterns.
 
 ## Current CodexPigeon Direction
 
@@ -53,6 +54,9 @@ When adding a reference, update this file with:
 - viewport size if known
 - which CodexPigeon screen/state should match it
 - any intentional deviations
+
+Do not commit screenshots that reveal private threads, private project names,
+local usernames, Codex logs, mailbox contents, or customer data.
 
 ## Visual QA Checklist
 

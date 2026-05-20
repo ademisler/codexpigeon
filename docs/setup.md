@@ -53,6 +53,15 @@ In browser mode:
 - The Vite middleware exposes local `/api/*` routes.
 - This mode is useful for screenshot/interaction testing.
 
+For public screenshots, use sanitized demo mode:
+
+```text
+http://127.0.0.1:5173/?demo=1
+```
+
+Demo mode uses synthetic threads, paths, mailbox messages, receipts, and
+automations. It does not read real Codex state or local mailbox files.
+
 Run full Electron development mode:
 
 ```bash

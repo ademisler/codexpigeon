@@ -116,6 +116,114 @@ const LAYOUT_STORAGE_KEYS = {
   rightCollapsed: "codexpigeon.layout.rightCollapsed",
 };
 
+const DEMO_WORKSPACE = "/Users/demo/Projects/codexpigeon-demo";
+
+const DEMO_THREADS: ThreadSummary[] = [
+  {
+    id: "thread_demo_active",
+    name: "Release prep",
+    preview: "Review mailbox install flow and screenshots.",
+    cwd: DEMO_WORKSPACE,
+    updatedAt: 1779272100,
+    status: { type: "active", activeFlags: ["waitingOnApproval"] },
+    activity: {
+      kind: "running",
+      reason: "Demo activity stream",
+      lastSeenAt: 1779272100,
+      detectionMode: "demo",
+    },
+  },
+  {
+    id: "thread_demo_docs",
+    name: "Docs polish",
+    preview: "Tighten README and release checklist.",
+    cwd: "/Users/demo/Projects/docs-worktree",
+    updatedAt: 1779268500,
+    status: { type: "idle" },
+    activity: {
+      kind: "idle",
+      reason: "No recent activity",
+      lastSeenAt: 1779268500,
+      detectionMode: "demo",
+    },
+  },
+  {
+    id: "thread_demo_ui",
+    name: "UI overflow check",
+    preview: "Verify repeat messages stay inside the inspector.",
+    cwd: "/Users/demo/Projects/ui-smoke",
+    updatedAt: 1779264900,
+    status: { type: "idle" },
+    activity: {
+      kind: "idle",
+      reason: "No recent activity",
+      lastSeenAt: 1779264900,
+      detectionMode: "demo",
+    },
+  },
+];
+
+const DEMO_SNAPSHOT: MailboxSnapshot = {
+  workspace: DEMO_WORKSPACE,
+  inbox: [
+    {
+      id: "msg_20260520T090000_01demo000000000000000000",
+      createdAt: "2026-05-20T09:00:00.000Z",
+      priority: "high",
+      scope: "current_task",
+      body: "Before final response, check that the installer preview only touches CodexPigeon-managed files.",
+    },
+    {
+      id: "msg_20260520T091500_01demo000000000000000001",
+      createdAt: "2026-05-20T09:15:00.000Z",
+      priority: "normal",
+      scope: "workspace",
+      body: "Keep the active turn uninterrupted; reply through OUTBOX.md only if a human-readable note is needed.",
+    },
+  ],
+  outbox: [
+    {
+      id: "reply_20260520T092000_01demo0000000000000000",
+      to: "msg_20260520T090000_01demo000000000000000000",
+      createdAt: "2026-05-20T09:20:00.000Z",
+      body: "Installer preview reviewed. No active chat steering is used.",
+    },
+  ],
+  receipts: [
+    {
+      id: "receipt_20260520T092000_01demo00000000000000",
+      messageId: "msg_20260520T090000_01demo000000000000000000",
+      seenAt: "2026-05-20T09:20:00.000Z",
+      decision: "accepted",
+      actionStatus: "applied",
+      summary: "Preview checked and documented.",
+      notes: null,
+    },
+  ],
+  automations: [
+    {
+      id: "auto_20260520T093000_01demo0000000000000000",
+      status: "active",
+      body: "Re-check mailbox status before the release handoff.",
+      priority: "normal",
+      scope: "current_task",
+      intervalMs: 300000,
+      createdAt: "2026-05-20T09:30:00.000Z",
+      updatedAt: "2026-05-20T09:30:00.000Z",
+      nextRunAt: "2026-05-20T09:35:00.000Z",
+      lastSentAt: null,
+      sentCount: 0,
+      sourceMessageId: "msg_20260520T091500_01demo000000000000000001",
+      allowWarnings: false,
+    },
+  ],
+  statuses: {
+    msg_20260520T090000_01demo000000000000000000: "applied",
+    msg_20260520T091500_01demo000000000000000001: "unseen",
+  },
+  unreadMessageIds: ["msg_20260520T091500_01demo000000000000000001"],
+};
+
 function createBrowserLocalApi() {
   const mailboxCallbacks = new Set<(snapshot: unknown) => void>();
   const automationCallbacks = new Set<(automations: unknown) => void>();
@@ -283,6 +391,113 @@ function createBrowserLocalApi() {
   };
 }
 
+function createDemoApi() {
+  return {
+    selectWorkspace: async () => DEMO_WORKSPACE,
+    getMailboxSnapshot: async () => DEMO_SNAPSHOT,
+    validateMessage: async () => [],
+    sendMessage: async () => ({
+      message: {
+        id: "msg_20260520T100000_01demo0000000000000000",
+      },
+    }),
+    listAutomations: async () => DEMO_SNAPSHOT.automations,
+    createAutomation: async () => ({
+      automation: DEMO_SNAPSHOT.automations[0],
+      warnings: [],
+    }),
+    stopAutomation: async () => ({
+      ...DEMO_SNAPSHOT.automations[0],
+      status: "paused",
+    }),
+    watchMailbox: async () => DEMO_SNAPSHOT,
+    unwatchMailbox: async () => undefined,
+    previewInstall: async () =>
+      [
+        "<!-- CODEXPIGEON_MAILBOX_START -->",
+        "## Codex Mailbox Protocol",
+        "",
+        "Check `.codex-mailbox/INBOX.md` at safe checkpoints.",
+        "<!-- CODEXPIGEON_MAILBOX_END -->",
+      ].join("\n"),
+    inspectInstall: async () => ({
+      workspace: DEMO_WORKSPACE,
+      installed: true,
+      agents: {
+        exists: true,
+        managedBlock: true,
+        malformedManagedBlock: false,
+      },
+      hooks: {
+        hooksJsonExists: true,
+        codexPigeonHook: true,
+        hookScriptExists: true,
+      },
+      mailbox: {
+        directoryExists: true,
+        readmeExists: true,
+        gitignoreExists: true,
+        inboxExists: true,
+        outboxExists: true,
+        receiptsExists: true,
+        stateExists: true,
+      },
+      missing: [],
+      warnings: [],
+    }),
+    applyInstall: async () => ({
+      created: [],
+      updated: [],
+      unchanged: ["AGENTS.md", ".codex/hooks.json"],
+    }),
+    listThreads: async () => ({
+      ok: true,
+      mode: "demo",
+      threads: DEMO_THREADS,
+      loadedThreadIds: ["thread_demo_active"],
+      detection: {
+        mode: "demo",
+        recentRunningWindowSeconds: 45,
+        liveProxyAvailable: false,
+        logStreamingThreads: 1,
+      },
+    }),
+    listHooks: async () => ({
+      ok: true,
+      mode: "demo",
+      hooks: {
+        data: [
+          {
+            cwd: DEMO_WORKSPACE,
+            hooks: [
+              {
+                key: "codexpigeon-session-start",
+                eventName: "SessionStart",
+                enabled: true,
+                trustStatus: "trusted",
+                command: "python3 .codex/hooks/codexpigeon_mailbox_hook.py",
+              },
+              {
+                key: "codexpigeon-post-tool",
+                eventName: "PostToolUse",
+                enabled: true,
+                trustStatus: "trusted",
+                command: "python3 .codex/hooks/codexpigeon_mailbox_hook.py",
+              },
+            ],
+            warnings: [],
+            errors: [],
+          },
+        ],
+      },
+    }),
+    onMailboxSnapshot: () => () => undefined,
+    onCodexNotification: () => () => undefined,
+    onAutomationChanged: () => () => undefined,
+    onAutomationError: () => () => undefined,
+  };
+}
+
 function formatTime(input: number | string | null | undefined): string {
   if (!input) {
     return "never";
@@ -385,15 +600,29 @@ function PigeonEmoji({ className = "" }: { className?: string }) {
 }
 
 export default function App() {
-  const api = useMemo(() => window.codexpigeon ?? createBrowserLocalApi(), []);
-  const isBrowserLocalApi = !window.codexpigeon;
+  const isDemoMode = useMemo(
+    () => new URLSearchParams(window.location.search).get("demo") === "1",
+    [],
+  );
+  const api = useMemo(
+    () =>
+      isDemoMode
+        ? createDemoApi()
+        : (window.codexpigeon ?? createBrowserLocalApi()),
+    [isDemoMode],
+  );
+  const isBrowserLocalApi = !window.codexpigeon && !isDemoMode;
   const [threads, setThreads] = useState<ThreadSummary[]>([]);
   const [selectedThreadId, setSelectedThreadId] = useState<string | null>(null);
-  const [workspace, setWorkspace] = useState(
-    () => localStorage.getItem("codexpigeon.workspace") ?? "",
+  const [workspace, setWorkspace] = useState(() =>
+    isDemoMode
+      ? DEMO_WORKSPACE
+      : (localStorage.getItem("codexpigeon.workspace") ?? ""),
   );
-  const [workspacePathInput, setWorkspacePathInput] = useState(
-    () => localStorage.getItem("codexpigeon.workspace") ?? "",
+  const [workspacePathInput, setWorkspacePathInput] = useState(() =>
+    isDemoMode
+      ? DEMO_WORKSPACE
+      : (localStorage.getItem("codexpigeon.workspace") ?? ""),
   );
   const [snapshot, setSnapshot] = useState<MailboxSnapshot | null>(null);
   const [appServer, setAppServer] = useState<AppServerState>(defaultAppServer);

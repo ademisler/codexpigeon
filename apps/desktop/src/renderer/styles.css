@@ -1228,7 +1228,7 @@ svg {
   padding-right: clamp(28px, 5vw, 68px);
 }
 
-@media (max-width: 1180px) {
+@media (max-width: 1360px) {
   .status-strip {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }

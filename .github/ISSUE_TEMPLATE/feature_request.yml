@@ -1,0 +1,29 @@
+name: Feature Request
+description: Suggest a CodexPigeon improvement.
+title: "[Feature]: "
+labels:
+  - enhancement
+body:
+  - type: markdown
+    attributes:
+      value: |
+        CodexPigeon must remain non-interrupting: no active chat steering, no turn injection, and no turn interruption.
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What workflow should this improve?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed Solution
+      description: Describe the behavior you want.
+    validations:
+      required: true
+  - type: textarea
+    id: safety
+    attributes:
+      label: Safety Boundary
+      description: Explain how the feature preserves the mailbox-only model.

@@ -15,6 +15,8 @@ Confirm:
 - no runtime `.codex-mailbox/INBOX.md`, `OUTBOX.md`, `RECEIPTS.md`,
   `STATE.json`, or `HOOK_STATE.json`
 - no temporary screenshots/logs unless intentionally documented
+- no private Codex references, project names, mailbox messages, or local user
+  data in README assets
 
 ## Quality Gates
 
@@ -44,6 +46,18 @@ Verify:
 - `Preview install` shows install preview
 - right inspector scroll reaches `Apply install`
 - enabling Repeat schedules an automation and the `Auto carriers` card can stop it
+
+Run sanitized screenshot mode:
+
+```text
+http://127.0.0.1:5173/?demo=1
+```
+
+Confirm:
+
+- workspace paths use synthetic `/Users/demo/...` values
+- mailbox messages are documentation-safe
+- right inspector and automation rows have no horizontal overflow
 
 Run Electron mode:
 
@@ -119,13 +133,29 @@ Expected:
 [codexpigeon] renderer ready (desktop-api)
 ```
 
+## Local macOS Launcher
+
+If refreshing the local installed development launcher:
+
+```bash
+pnpm build
+pnpm install:mac -- --skip-build
+codexpigeon doctor
+codexpigeon-desktop
+```
+
+Expected:
+
+```text
+[codexpigeon] renderer ready (desktop-api)
+```
+
 ## GitHub Push
 
-The repository currently has no remote assumptions. After review:
+After review:
 
 ```bash
 git add .
-git commit -m "Prepare CodexPigeon MVP"
-git remote add origin <your-repo-url>
-git push -u origin main
+git commit -m "Polish GitHub presentation"
+git push origin main
 ```

@@ -1,54 +1,83 @@
-# CodexPigeon
+<p align="center">
+  <img src="docs/assets/hero/codexpigeon-hero.png" alt="CodexPigeon hero" width="100%">
+</p>
 
-CodexPigeon is a desktop companion for Codex that lets a human leave
-non-interrupting guidance for an active Codex task through repo-local mailbox
-files.
+<h1 align="center">CodexPigeon</h1>
 
-The invariant is strict:
+<p align="center">
+  Non-interrupting mailbox companion for Codex worktrees.
+</p>
 
-- CodexPigeon does not steer an active Codex turn.
-- CodexPigeon does not inject chat messages.
-- CodexPigeon does not interrupt, start, or mutate Codex conversations.
-- CodexPigeon writes only mailbox files in a selected repo/worktree.
-- Codex App Server is used only for read/status/discovery.
+<p align="center">
+  Built by <a href="https://github.com/ademisler">Adem Isler</a> · MIT licensed · macOS and Linux development builds
+</p>
 
-The app is ready for Linux and macOS development use today. The monorepo is
-structured so signed macOS/Windows packaging can be added later without
-changing the mailbox protocol.
+<p align="center">
+  <a href="https://github.com/ademisler/codexpigeon/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/ademisler/codexpigeon/actions/workflows/ci.yml/badge.svg"></a>
+  <a href="LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-f97316.svg"></a>
+  <img alt="Platform: macOS and Linux" src="https://img.shields.io/badge/platform-macOS%20%2B%20Linux-4b5563.svg">
+</p>
 
-## Current Status
+---
 
-This repository contains a working MVP:
+## What This Is
 
-- Electron + React + Vite desktop app.
-- `codexpigeon` CLI helper.
-- Mailbox parser/serializer and installer core.
-- Read-only Codex App Server JSON-RPC client.
-- Project-local hook runtime installer.
-- AGENTS.md and mailbox templates.
-- Optional repeated mailbox sending from the desktop UI and CLI.
-- Tests for mailbox parsing/install behavior, hooks, and App Server allowlist.
+CodexPigeon lets a human leave repo-local guidance for a Codex task without
+injecting into the active chat turn.
 
-UI parity with the official Codex app is intentionally limited until more
-reference screenshots are added under
-`docs/design/references/codex-app/`.
+It gives each selected repo/worktree a `.codex-mailbox/` folder. The app and CLI
+append human messages to `INBOX.md`; the Codex agent reads those messages at
+safe checkpoints through installed project instructions and hooks, then writes
+status back to agent-owned files.
 
-## Monorepo Layout
+The product invariant is strict:
 
-```text
-apps/
-  desktop/                 Electron main/preload + React renderer
-packages/
-  mailbox-core/            Mailbox protocol, parser, installer, validation
-  codex-app-server/        Read-only Codex App Server JSON-RPC client
-  cli/                     send/watch/install/doctor commands
-  hooks/                   Hook runtime assets copied into workspaces
-  ui/                      Shared UI primitives and tokens
-templates/                 Human-readable install templates
-docs/                      Architecture, setup, protocol, security, roadmap
-```
+- no active chat steering
+- no chat message injection
+- no turn interruption or turn start APIs
+- no App Server write APIs
+- no app writes to agent-owned `OUTBOX.md` or `RECEIPTS.md`
 
-## Quick Start
+## Open Source
+
+This repository is intended to be inspectable. The mailbox protocol is plain
+Markdown, runtime files are repo-local, and all Codex App Server access is
+restricted to read/status/discovery methods.
+
+The current release is a working MVP for local macOS and Linux development.
+Signed packages can be added later without changing the protocol.
+
+## Screenshot
+
+<p align="center">
+  <img src="docs/assets/screenshots/codexpigeon-demo.png" alt="CodexPigeon demo screenshot" width="100%">
+</p>
+
+The README screenshot is captured from demo mode with synthetic workspace paths
+and synthetic mailbox content. It does not show private Codex state.
+
+## What You Get
+
+| Area              | Included                                                                                   |
+| ----------------- | ------------------------------------------------------------------------------------------ |
+| Desktop app       | Electron + React + Vite app with mailbox, receipts, outbox, install, and diagnostics views |
+| CLI               | `codexpigeon doctor`, `install`, `send`, `watch`, `snapshot`, and automation commands      |
+| Mailbox core      | Parser, serializer, installer, validation, file ownership, and repeat scheduling           |
+| Codex integration | Read-only App Server client for thread and hook discovery                                  |
+| Hooks             | Project-local hook runtime copied into trusted workspaces                                  |
+| Templates         | Managed `AGENTS.md`, `.codex/hooks.json`, and `.codex-mailbox/` templates                  |
+| Tests             | Mailbox behavior, installer boundaries, hook runtime, and App Server allowlist coverage    |
+
+## The Result
+
+| Without CodexPigeon                              | With CodexPigeon                                                           |
+| ------------------------------------------------ | -------------------------------------------------------------------------- |
+| You must interrupt an active chat to add context | You leave a mailbox note for the next safe checkpoint                      |
+| Guidance can get mixed into conversational flow  | Guidance is stored as repo-local working state                             |
+| Follow-up reminders are manual                   | Optional repeats append normal inbox messages while the app/CLI is running |
+| App Server boundaries are easy to blur           | Mutating App Server methods are rejected by design                         |
+
+## Quick Start: macOS
 
 Requirements:
 
@@ -62,57 +91,71 @@ pnpm install
 pnpm typecheck
 pnpm test
 pnpm build
-pnpm doctor
+pnpm install:mac
+```
+
+This creates:
+
+```text
+~/.local/bin/codexpigeon
+~/.local/bin/codexpigeon-desktop
+~/Applications/CodexPigeon.app
+```
+
+Then run:
+
+```bash
+codexpigeon doctor
+codexpigeon-desktop
+```
+
+## Quick Start: Development
+
+Run the browser development shell:
+
+```bash
 pnpm dev
 ```
 
-`pnpm dev` serves the renderer at
-`http://127.0.0.1:5173/` with a Vite-local Node API. Browser mode cannot open a
-native folder picker, so type an absolute repo/worktree path in the right
-inspector.
+Open:
 
-For the full Electron runtime with native folder selection:
+```text
+http://127.0.0.1:5173/
+```
+
+Browser mode uses a Vite-local Node API and cannot open a native folder picker.
+Type an absolute repo/worktree path in the right inspector.
+
+Run the full Electron runtime:
 
 ```bash
 pnpm --filter @codexpigeon/desktop dev:electron
 ```
 
-For a local macOS development install after a successful build:
+Run sanitized demo mode for screenshots:
 
-```bash
-pnpm install:mac
+```text
+http://127.0.0.1:5173/?demo=1
 ```
-
-This creates `~/.local/bin/codexpigeon`, `~/.local/bin/codexpigeon-desktop`,
-and `~/Applications/CodexPigeon.app` wrappers that run the built workspace.
 
 ## CLI
 
-During development, run CLI commands through the workspace package:
+During development:
 
 ```bash
 pnpm --filter @codexpigeon/cli start -- doctor
 pnpm --filter @codexpigeon/cli start -- install --workspace /path/to/worktree
-pnpm --filter @codexpigeon/cli start -- send --workspace /path/to/worktree "Do not touch auth without asking first."
-pnpm --filter @codexpigeon/cli start -- send --workspace /path/to/worktree --repeat-every 5m "Please keep checking the deploy gate."
+pnpm --filter @codexpigeon/cli start -- send --workspace /path/to/worktree "Check the mailbox before final response."
+pnpm --filter @codexpigeon/cli start -- send --workspace /path/to/worktree --repeat-every 5m "Please re-check the release gate."
 pnpm --filter @codexpigeon/cli start -- watch --workspace /path/to/worktree
 pnpm --filter @codexpigeon/cli start -- snapshot --workspace /path/to/worktree
 pnpm --filter @codexpigeon/cli start -- automation list --workspace /path/to/worktree
 pnpm --filter @codexpigeon/cli start -- automation stop --workspace /path/to/worktree auto_...
 ```
 
-After `pnpm build`, the compiled package exposes the `codexpigeon` binary from
-`packages/cli/dist/index.js`.
-
-## Optional Repeat Sending
-
-Repeat sending is opt-in per message. When enabled, CodexPigeon sends the first
-message immediately, stores an app-owned automation in `STATE.json`, and appends
-future copies to `INBOX.md` only when the desktop app is running or the CLI is
-explicitly running due automations.
-
-The agent still sees normal inbox messages at safe checkpoints. CodexPigeon
-does not steer active chat, even for scheduled repeats.
+After `pnpm build`, the compiled CLI is exposed from
+`packages/cli/dist/index.js` and from the local macOS wrapper installed by
+`pnpm install:mac`.
 
 ## Workspace Install Behavior
 
@@ -128,24 +171,26 @@ AGENTS.md
 .codex-mailbox/STATE.json
 ```
 
-Existing `AGENTS.md` content is preserved. CodexPigeon inserts or replaces only
-the block between:
+Existing `AGENTS.md` content is preserved. CodexPigeon replaces only the managed
+block between:
 
 ```md
 <!-- CODEXPIGEON_MAILBOX_START -->
 <!-- CODEXPIGEON_MAILBOX_END -->
 ```
 
-If only one marker exists, the installer refuses to update automatically.
-Existing `.codex/hooks.json` files are parsed and merged; non-CodexPigeon hook
+Existing `.codex/hooks.json` files are parsed and merged. Non-CodexPigeon hook
 groups are preserved.
 
-Agent-owned `OUTBOX.md` and `RECEIPTS.md` are not written by the app/CLI. The
-installed hook creates those agent-owned files when Codex runs in the trusted
-workspace, and snapshots treat missing agent-owned files as empty.
+Agent-owned files are not written by the app/CLI:
 
-Runtime mailbox files are local collaboration state and should not be committed.
-The generated `.codex-mailbox/.gitignore` ignores the mutable mailbox files.
+```text
+.codex-mailbox/OUTBOX.md
+.codex-mailbox/RECEIPTS.md
+```
+
+The installed hook creates those agent-owned files when Codex runs in the
+trusted workspace, and snapshots treat missing agent-owned files as empty.
 
 ## Mailbox Rule
 
@@ -157,16 +202,18 @@ Each thread/worktree should have its own mailbox:
 
 Ownership is strict:
 
-- `INBOX.md`: app/CLI writes only.
-- `OUTBOX.md`: Codex agent writes only.
-- `RECEIPTS.md`: Codex agent writes only.
-- `STATE.json`: app-owned technical state.
-- `HOOK_STATE.json`: hook-owned throttle/runtime state.
+| File              | Owner                             |
+| ----------------- | --------------------------------- |
+| `INBOX.md`        | App/CLI writes only               |
+| `OUTBOX.md`       | Codex agent writes only           |
+| `RECEIPTS.md`     | Codex agent writes only           |
+| `STATE.json`      | App-owned technical state         |
+| `HOOK_STATE.json` | Hook-owned throttle/runtime state |
 
 See [Mailbox Protocol](docs/protocol.md) for message examples and status
 derivation.
 
-## Codex Integration Boundary
+## Safety Boundary
 
 CodexPigeon permits only these App Server methods:
 
@@ -179,42 +226,27 @@ CodexPigeon permits only these App Server methods:
 The client rejects active-turn methods such as `turn/steer`, `turn/start`,
 `thread/inject_items`, and `turn/interrupt`.
 
-This matches the product goal: observe Codex, install mailbox support, and let
-agents read mailbox files at safe checkpoints without interrupting their active
-chat flow.
+Mailbox content is treated as prompt-like human guidance, not executable shell
+content.
 
 ## Documentation
 
-- [Architecture](docs/architecture.md)
-- [Setup](docs/setup.md)
-- [Mailbox Protocol](docs/protocol.md)
-- [Security Model](docs/security.md)
-- [Development Guide](docs/development.md)
-- [Troubleshooting](docs/troubleshooting.md)
-- [Release Checklist](docs/release-checklist.md)
-- [Platform Roadmap](docs/platform-roadmap.md)
-- [Design References](docs/design/references.md)
+| Document                                       | Purpose                                  |
+| ---------------------------------------------- | ---------------------------------------- |
+| [Architecture](docs/architecture.md)           | Package boundaries and data flow         |
+| [Setup](docs/setup.md)                         | Local setup and development runtime      |
+| [Mailbox Protocol](docs/protocol.md)           | Markdown file format and ownership rules |
+| [Security Model](docs/security.md)             | Trust boundaries and review checklist    |
+| [Development Guide](docs/development.md)       | Package workflow and checks              |
+| [Troubleshooting](docs/troubleshooting.md)     | Common local issues                      |
+| [Screenshots and Assets](docs/screenshots.md)  | Sanitized asset capture rules            |
+| [Publishing Checklist](docs/publishing.md)     | GitHub release preparation               |
+| [Release Checklist](docs/release-checklist.md) | Build, smoke test, and handoff steps     |
+| [Platform Roadmap](docs/platform-roadmap.md)   | Packaging and platform plans             |
+| [Design References](docs/design/references.md) | UI reference policy                      |
 
-## Official Codex References
+## Project Status
 
-CodexPigeon is designed around the current Codex surfaces documented by OpenAI:
-
-- [AGENTS.md](https://developers.openai.com/codex/guides/agents-md)
-- [Hooks](https://developers.openai.com/codex/hooks)
-- [Worktrees](https://developers.openai.com/codex/app/worktrees)
-- [App Server](https://developers.openai.com/codex/app-server)
-- [Advanced Configuration](https://developers.openai.com/codex/config-advanced)
-
-## GitHub Readiness
-
-Before pushing:
-
-```bash
-pnpm typecheck
-pnpm test
-pnpm build
-git status --short
-```
-
-Generated `dist/`, `node_modules/`, runtime mailbox files, and local editor/OS
-state are ignored.
+CodexPigeon is usable today for local macOS and Linux development. The next
+packaging milestones are signed macOS builds, Linux desktop packages, and a
+Windows packaging path after the mailbox protocol has more real-world mileage.
