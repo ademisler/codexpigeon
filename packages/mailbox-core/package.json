@@ -1,0 +1,32 @@
+{
+  "name": "@codexpigeon/mailbox-core",
+  "version": "0.1.0",
+  "type": "module",
+  "license": "MIT",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsup src/index.ts --format esm --dts --sourcemap",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "chokidar": "^4.0.3",
+    "mdast-util-to-string": "^4.0.0",
+    "proper-lockfile": "^4.1.2",
+    "remark-parse": "^11.0.0",
+    "ulid": "^3.0.0",
+    "unified": "^11.0.5",
+    "zod": "^3.25.28"
+  },
+  "devDependencies": {
+    "@types/proper-lockfile": "^4.1.4"
+  }
+}

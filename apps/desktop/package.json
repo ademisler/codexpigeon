@@ -1,0 +1,34 @@
+{
+  "name": "@codexpigeon/desktop",
+  "version": "0.1.0",
+  "type": "module",
+  "license": "MIT",
+  "main": "dist/electron/main/main.js",
+  "private": true,
+  "scripts": {
+    "dev": "vite --host 127.0.0.1 --port 5173",
+    "dev:electron": "pnpm build:main && concurrently \"vite --host 127.0.0.1 --port 5173\" \"wait-on http://127.0.0.1:5173 && VITE_DEV_SERVER_URL=http://127.0.0.1:5173 electron dist/electron/main/main.js\"",
+    "build:main": "node -e \"require('node:fs').rmSync('dist/electron',{recursive:true,force:true})\" && tsup src/main/main.ts --format esm --sourcemap --out-dir dist/electron/main && tsup src/preload/preload.ts --format cjs --sourcemap --out-dir dist/electron/preload",
+    "build": "pnpm build:main && vite build",
+    "preview": "vite preview --host 127.0.0.1 --port 4173",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@codexpigeon/codex-app-server": "workspace:*",
+    "@codexpigeon/hooks": "workspace:*",
+    "@codexpigeon/mailbox-core": "workspace:*",
+    "@codexpigeon/ui": "workspace:*",
+    "@vitejs/plugin-react": "^4.5.0",
+    "concurrently": "^9.1.2",
+    "electron": "^36.3.1",
+    "lucide-react": "^0.511.0",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "vite": "^6.3.5",
+    "wait-on": "^8.0.3"
+  },
+  "devDependencies": {
+    "@types/react": "^19.1.5",
+    "@types/react-dom": "^19.1.5"
+  }
+}

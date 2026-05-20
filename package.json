@@ -1,0 +1,28 @@
+{
+  "name": "codexpigeon",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Non-interrupting mailbox companion for Codex threads and worktrees.",
+  "license": "MIT",
+  "type": "module",
+  "packageManager": "pnpm@11.1.2",
+  "scripts": {
+    "dev": "pnpm --filter @codexpigeon/desktop dev",
+    "build": "pnpm -r --sort build",
+    "typecheck": "pnpm -r --sort typecheck",
+    "test": "pnpm -r --if-present test",
+    "test:watch": "pnpm -r --if-present test:watch",
+    "lint": "pnpm -r --if-present lint",
+    "format": "prettier --write .",
+    "install:mac": "scripts/install-macos-local.sh",
+    "doctor": "pnpm --filter @codexpigeon/cli start -- doctor"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.21",
+    "prettier": "^3.5.3",
+    "tsup": "^8.5.0",
+    "tsx": "^4.19.4",
+    "typescript": "^5.8.3",
+    "vitest": "^3.1.4"
+  }
+}

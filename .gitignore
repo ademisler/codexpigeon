@@ -1,0 +1,34 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+build/
+out/
+coverage/
+*.tsbuildinfo
+
+# Runtime mailbox state
+.codex-mailbox/
+.codex/
+
+# Local environment
+.env
+.env.*
+!.env.example
+
+# Logs and caches
+*.log
+.vite/
+.turbo/
+.cache/
+
+# OS/editor state
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# Local design captures and scratch exports
+codex screenshoot/
+

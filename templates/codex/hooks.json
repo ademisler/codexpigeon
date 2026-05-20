@@ -1,0 +1,42 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "startup|resume|clear",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"$(git rev-parse --show-toplevel 2>/dev/null || pwd)/.codex/hooks/codexpigeon_mailbox_hook.py\"",
+            "timeout": 10,
+            "statusMessage": "Loading CodexPigeon mailbox"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Bash|apply_patch|mcp__.*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"$(git rev-parse --show-toplevel 2>/dev/null || pwd)/.codex/hooks/codexpigeon_mailbox_hook.py\"",
+            "timeout": 10,
+            "statusMessage": "Checking CodexPigeon mailbox"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"$(git rev-parse --show-toplevel 2>/dev/null || pwd)/.codex/hooks/codexpigeon_mailbox_hook.py\"",
+            "timeout": 10,
+            "statusMessage": "Final CodexPigeon mailbox check"
+          }
+        ]
+      }
+    ]
+  }
+}

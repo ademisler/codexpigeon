@@ -1,0 +1,25 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "baseUrl": ".",
+    "paths": {
+      "@codexpigeon/mailbox-core": ["packages/mailbox-core/src/index.ts"],
+      "@codexpigeon/hooks": ["packages/hooks/src/index.ts"],
+      "@codexpigeon/codex-app-server": ["packages/codex-app-server/src/index.ts"],
+      "@codexpigeon/ui": ["packages/ui/src/index.ts"]
+    },
+    "strict": true,
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "noUncheckedIndexedAccess": true,
+    "noImplicitOverride": true
+  }
+}

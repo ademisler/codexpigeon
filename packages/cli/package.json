@@ -1,0 +1,22 @@
+{
+  "name": "@codexpigeon/cli",
+  "version": "0.1.0",
+  "type": "module",
+  "license": "MIT",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "bin": {
+    "codexpigeon": "./dist/index.js"
+  },
+  "scripts": {
+    "build": "tsup src/index.ts --format esm --dts --sourcemap",
+    "typecheck": "tsc --noEmit",
+    "start": "tsx src/index.ts"
+  },
+  "dependencies": {
+    "@codexpigeon/hooks": "workspace:*",
+    "@codexpigeon/mailbox-core": "workspace:*",
+    "commander": "^13.1.0",
+    "picocolors": "^1.1.1"
+  }
+}
