@@ -39,6 +39,11 @@ let automationTimer: NodeJS.Timeout | null = null;
 let codexClientPromise: Promise<CodexAppServerClient> | null = null;
 
 const RECENT_RUNNING_WINDOW_SECONDS = 45;
+const hasSingleInstanceLock = app.requestSingleInstanceLock();
+
+if (!hasSingleInstanceLock) {
+  app.quit();
+}
 
 function rendererUrl(): string {
   if (process.env.VITE_DEV_SERVER_URL) {
@@ -172,6 +177,10 @@ function createWindow(): void {
     console.error(`[codexpigeon] renderer process gone: ${details.reason}`);
   });
 
+  mainWindow.on("closed", () => {
+    mainWindow = null;
+  });
+
   mainWindow.webContents.on("did-finish-load", () => {
     void mainWindow?.webContents
       .executeJavaScript("Boolean(window.codexpigeon)", true)
@@ -188,6 +197,18 @@ function createWindow(): void {
   });
 
   void mainWindow.loadURL(rendererUrl());
+}
+
+function showMainWindow(): void {
+  if (!mainWindow || mainWindow.isDestroyed()) {
+    createWindow();
+    return;
+  }
+  if (mainWindow.isMinimized()) {
+    mainWindow.restore();
+  }
+  mainWindow.show();
+  mainWindow.focus();
 }
 
 function stopAutomationRunner(): void {
@@ -379,31 +400,33 @@ ipcMain.handle("codex:hooks", async (_event, workspace: string) => {
   }
 });
 
-app
-  .whenReady()
-  .then(createWindow)
-  .catch((error) => {
-    console.error(error);
+if (hasSingleInstanceLock) {
+  app
+    .whenReady()
+    .then(createWindow)
+    .catch((error) => {
+      console.error(error);
+    });
+
+  app.on("second-instance", () => {
+    showMainWindow();
   });
 
-app.on("window-all-closed", () => {
-  if (process.platform !== "darwin") {
+  app.on("window-all-closed", () => {
     app.quit();
-  }
-});
+  });
 
-app.on("before-quit", () => {
-  stopAutomationRunner();
-  if (stopMailboxWatch) {
-    void stopMailboxWatch();
-  }
-  void codexClientPromise
-    ?.then((client) => client.close())
-    .catch(() => undefined);
-});
+  app.on("before-quit", () => {
+    stopAutomationRunner();
+    if (stopMailboxWatch) {
+      void stopMailboxWatch();
+    }
+    void codexClientPromise
+      ?.then((client) => client.close())
+      .catch(() => undefined);
+  });
 
-app.on("activate", () => {
-  if (BrowserWindow.getAllWindows().length === 0) {
-    createWindow();
-  }
-});
+  app.on("activate", () => {
+    showMainWindow();
+  });
+}
