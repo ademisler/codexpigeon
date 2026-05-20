@@ -22,6 +22,34 @@ electron_package_dir="$(
   "$node_bin" -e 'const path=require("node:path"); const packagePath=require.resolve("electron/package.json",{paths:[process.argv[1]]}); console.log(path.dirname(packagePath));' "$repo_root/apps/desktop"
 )"
 electron_native="$electron_package_dir/dist/Electron.app/Contents/MacOS/Electron"
+codex_app_bin="/Applications/Codex.app/Contents/Resources/codex"
+codex_bin="$(command -v codex || true)"
+if [[ -x "$codex_app_bin" ]]; then
+  codex_bin="$codex_app_bin"
+fi
+launcher_path="$(
+  "$node_bin" <<'NODE'
+const path = require("node:path");
+const os = require("node:os");
+const home = os.homedir();
+const stable = [
+  path.join(home, ".local/bin"),
+  "/Applications/Codex.app/Contents/Resources",
+  "/opt/homebrew/bin",
+  "/opt/homebrew/sbin",
+  "/usr/local/bin",
+  "/usr/bin",
+  "/bin",
+  "/usr/sbin",
+  "/sbin",
+];
+const current = (process.env.PATH || "")
+  .split(path.delimiter)
+  .filter(Boolean)
+  .filter((entry) => !entry.startsWith(path.join(home, ".codex/tmp")));
+console.log([...new Set([...stable, ...current])].join(path.delimiter));
+NODE
+)"
 home_app="$HOME/Applications/CodexPigeon.app"
 system_app="/Applications/CodexPigeon.app"
 if [[ -w "/Applications" ]]; then
@@ -44,6 +72,10 @@ set -euo pipefail
 repo_root="$repo_root"
 electron_native="$electron_native"
 main_entry="$main_entry"
+export PATH="$launcher_path"
+if [[ -n "$codex_bin" ]]; then
+  export CODEXPIGEON_CODEX_BIN="$codex_bin"
+fi
 
 if [[ ! -x "\$electron_native" || ! -f "\$main_entry" ]]; then
   cd "\$repo_root"
@@ -70,10 +102,13 @@ if command -v cc >/dev/null 2>&1; then
   electron_native_escaped="$(printf "%s" "$electron_native" | sed 's/\\/\\\\/g; s/"/\\"/g')"
   main_entry_escaped="$(printf "%s" "$main_entry" | sed 's/\\/\\\\/g; s/"/\\"/g')"
   launcher_log_escaped="$(printf "%s" "$launcher_log" | sed 's/\\/\\\\/g; s/"/\\"/g')"
+  launcher_path_escaped="$(printf "%s" "$launcher_path" | sed 's/\\/\\\\/g; s/"/\\"/g')"
+  codex_bin_escaped="$(printf "%s" "$codex_bin" | sed 's/\\/\\\\/g; s/"/\\"/g')"
   cat > "$launcher_source" <<EOF
 #include <errno.h>
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 #include <unistd.h>
 
 int main(void) {
@@ -81,7 +116,14 @@ int main(void) {
   const char *electron_native = "$electron_native_escaped";
   const char *main_entry = "$main_entry_escaped";
   const char *launcher_log = "$launcher_log_escaped";
+  const char *launcher_path = "$launcher_path_escaped";
+  const char *codex_bin = "$codex_bin_escaped";
   char *const args[] = {(char *)electron_native, (char *)main_entry, 0};
+
+  setenv("PATH", launcher_path, 1);
+  if (strlen(codex_bin) > 0) {
+    setenv("CODEXPIGEON_CODEX_BIN", codex_bin, 1);
+  }
 
   if (chdir(repo_root) != 0) {
     FILE *log = fopen(launcher_log, "a");

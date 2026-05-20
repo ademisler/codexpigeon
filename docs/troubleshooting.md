@@ -76,6 +76,9 @@ CodexPigeon tries:
 If both fail:
 
 - ensure `codex` is on `PATH`
+- on macOS Dock launches, confirm
+  `/Applications/Codex.app/Contents/Resources/codex` exists or rerun
+  `pnpm install:mac -- --skip-build` to refresh the launcher environment
 - run `codex --version`
 - run `pnpm doctor`
 - confirm Codex Desktop/CLI is installed and authenticated

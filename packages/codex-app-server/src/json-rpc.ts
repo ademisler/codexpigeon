@@ -25,6 +25,7 @@ export class JsonRpcProcessTransport extends EventEmitter<{
     private readonly command: string,
     private readonly args: string[],
     private readonly cwd?: string,
+    private readonly env?: NodeJS.ProcessEnv,
   ) {
     super();
   }
@@ -36,6 +37,7 @@ export class JsonRpcProcessTransport extends EventEmitter<{
 
     this.proc = spawn(this.command, this.args, {
       cwd: this.cwd,
+      env: this.env,
       stdio: ["pipe", "pipe", "pipe"],
     });
 

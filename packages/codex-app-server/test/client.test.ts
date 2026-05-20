@@ -1,8 +1,13 @@
 import { describe, expect, it } from "vitest";
+import fs from "node:fs";
+import os from "node:os";
+import path from "node:path";
 import {
   CodexAppServerClient,
+  createCodexProcessEnv,
   JsonRpcProcessTransport,
   MockTransport,
+  resolveCodexCommand,
 } from "../src";
 
 describe("CodexAppServerClient", () => {
@@ -53,5 +58,23 @@ describe("CodexAppServerClient", () => {
 
     await expect(transport.request("initialize", {}, 500)).rejects.toThrow();
     transport.close();
+  });
+
+  it("augments launchd-style PATH values for Codex lookup", () => {
+    const env = createCodexProcessEnv({ PATH: "/usr/bin:/bin" });
+    const entries = env.PATH?.split(path.delimiter) ?? [];
+
+    expect(entries).toContain("/Applications/Codex.app/Contents/Resources");
+    expect(entries).toContain("/opt/homebrew/bin");
+    expect(entries).toContain("/usr/bin");
+  });
+
+  it("resolves codex from the provided executable path", () => {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "codexpigeon-codex-"));
+    const executable = path.join(dir, "codex");
+    fs.writeFileSync(executable, "#!/bin/sh\nexit 0\n");
+    fs.chmodSync(executable, 0o755);
+
+    expect(resolveCodexCommand(undefined, { PATH: dir })).toBe(executable);
   });
 });

@@ -1,4 +1,7 @@
 import EventEmitter from "eventemitter3";
+import fs from "node:fs";
+import os from "node:os";
+import path from "node:path";
 import { JsonRpcProcessTransport } from "./json-rpc";
 import {
   assertReadOnlyMethod,
@@ -23,9 +26,95 @@ export type CodexAppServerMode = "proxy" | "stdio" | "mock";
 
 export type CodexAppServerClientOptions = {
   cwd?: string;
+  codexCommand?: string;
   transport?: Transport;
   mode?: CodexAppServerMode;
 };
+
+const DEFAULT_EXECUTABLE_PATHS = [
+  ".local/bin",
+  "/Applications/Codex.app/Contents/Resources",
+  "/opt/homebrew/bin",
+  "/opt/homebrew/sbin",
+  "/usr/local/bin",
+  "/usr/bin",
+  "/bin",
+  "/usr/sbin",
+  "/sbin",
+];
+
+function stableExecutablePaths(): string[] {
+  const home = os.homedir();
+  return DEFAULT_EXECUTABLE_PATHS.map((entry) =>
+    entry.startsWith(".") ? path.join(home, entry) : entry,
+  );
+}
+
+function pathEntries(value: string | undefined): string[] {
+  return (value ?? "")
+    .split(path.delimiter)
+    .map((entry) => entry.trim())
+    .filter(Boolean);
+}
+
+function dedupePaths(entries: string[]): string[] {
+  const seen = new Set<string>();
+  return entries.filter((entry) => {
+    if (seen.has(entry)) {
+      return false;
+    }
+    seen.add(entry);
+    return true;
+  });
+}
+
+function canExecute(filePath: string): boolean {
+  try {
+    fs.accessSync(filePath, fs.constants.X_OK);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+export function createCodexProcessEnv(
+  baseEnv: NodeJS.ProcessEnv = process.env,
+): NodeJS.ProcessEnv {
+  const searchPath = dedupePaths([
+    ...stableExecutablePaths(),
+    ...pathEntries(baseEnv.PATH),
+  ]).join(path.delimiter);
+
+  return {
+    ...baseEnv,
+    PATH: searchPath,
+  };
+}
+
+export function resolveCodexCommand(
+  command: string | undefined = undefined,
+  env: NodeJS.ProcessEnv = process.env,
+): string {
+  const commandName = command || env.CODEXPIGEON_CODEX_BIN || "codex";
+
+  if (commandName.includes("/") || commandName.includes("\\")) {
+    return commandName;
+  }
+
+  const searchPaths = dedupePaths([
+    ...pathEntries(env.PATH),
+    ...stableExecutablePaths(),
+  ]);
+
+  for (const dir of searchPaths) {
+    const candidate = path.join(dir, commandName);
+    if (canExecute(candidate)) {
+      return candidate;
+    }
+  }
+
+  return commandName;
+}
 
 export class CodexAppServerClient extends EventEmitter<{
   notification: (notification: JsonRpcNotification) => void;
@@ -96,7 +185,15 @@ export async function createCodexAppServerClient(
     return new CodexAppServerClient(options.transport, options.mode ?? "mock");
   }
 
-  const proxy = new JsonRpcProcessTransport("codex", ["app-server", "proxy"], options.cwd);
+  const env = createCodexProcessEnv();
+  const codexCommand = resolveCodexCommand(options.codexCommand, env);
+
+  const proxy = new JsonRpcProcessTransport(
+    codexCommand,
+    ["app-server", "proxy"],
+    options.cwd,
+    env,
+  );
   const proxyClient = new CodexAppServerClient(proxy, "proxy");
   try {
     await proxyClient.initialize();
@@ -105,7 +202,12 @@ export async function createCodexAppServerClient(
     proxyClient.close();
   }
 
-  const stdio = new JsonRpcProcessTransport("codex", ["app-server"], options.cwd);
+  const stdio = new JsonRpcProcessTransport(
+    codexCommand,
+    ["app-server"],
+    options.cwd,
+    env,
+  );
   const stdioClient = new CodexAppServerClient(stdio, "stdio");
   await stdioClient.initialize();
   return stdioClient;
