@@ -41,6 +41,31 @@ For native folder selection, run Electron:
 pnpm --filter @codexpigeon/desktop dev:electron
 ```
 
+## macOS Dock Click Does Not Open
+
+Refresh the local app bundle after rebuilding:
+
+```bash
+pnpm build
+pnpm install:mac -- --skip-build
+```
+
+Expected:
+
+```text
+/Applications/CodexPigeon.app
+```
+
+If Dock/LaunchServices starts and immediately exits, check the native launcher
+log:
+
+```bash
+sed -n '1,120p' ~/Library/Logs/CodexPigeon-launcher.log
+```
+
+The macOS app launcher should execute Electron directly, not rely on
+`~/.local/bin/codexpigeon-desktop` or an interactive shell.
+
 ## App Server Shows Degraded
 
 CodexPigeon tries:

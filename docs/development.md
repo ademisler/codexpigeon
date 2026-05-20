@@ -154,7 +154,8 @@ This installs:
 ```text
 ~/.local/bin/codexpigeon
 ~/.local/bin/codexpigeon-desktop
-~/Applications/CodexPigeon.app
+/Applications/CodexPigeon.app     # preferred when /Applications is writable
+~/Applications/CodexPigeon.app    # fallback when /Applications is not writable
 ```
 
 Linux desktop launcher files are machine-local. Keep them out of Git:

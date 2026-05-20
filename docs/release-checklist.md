@@ -154,6 +154,9 @@ Confirm `CodexPigeon.app` exists in `/Applications` when that directory is
 writable, otherwise in `~/Applications`. There should be only one installed app
 bundle with the `dev.codexpigeon.local` bundle identifier.
 
+Click the Dock icon, close the window, then click the same Dock icon again. The
+second click should open a fresh `CodexPigeon` window without using Terminal.
+
 ## GitHub Push
 
 After review:

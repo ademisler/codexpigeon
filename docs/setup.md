@@ -128,11 +128,14 @@ The script creates:
 ~/Applications/CodexPigeon.app    # fallback when /Applications is not writable
 ```
 
-The wrappers point at the built Electron entrypoint:
+The shell wrapper and macOS app launcher point at the built Electron entrypoint:
 
 ```text
 apps/desktop/dist/electron/main/main.js
 ```
+
+On macOS, `CodexPigeon.app` launches the native Electron binary directly so
+Dock/LaunchServices does not depend on an interactive shell environment.
 
 On Linux during development, a local launcher can point at the same built
 Electron entrypoint. The current Linux development machine uses:

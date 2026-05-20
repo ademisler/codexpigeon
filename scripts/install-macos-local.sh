@@ -17,6 +17,11 @@ mkdir -p "$HOME/.local/bin"
 
 desktop_launcher="$HOME/.local/bin/codexpigeon-desktop"
 cli_launcher="$HOME/.local/bin/codexpigeon"
+main_entry="$repo_root/apps/desktop/dist/electron/main/main.js"
+electron_package_dir="$(
+  "$node_bin" -e 'const path=require("node:path"); const packagePath=require.resolve("electron/package.json",{paths:[process.argv[1]]}); console.log(path.dirname(packagePath));' "$repo_root/apps/desktop"
+)"
+electron_native="$electron_package_dir/dist/Electron.app/Contents/MacOS/Electron"
 home_app="$HOME/Applications/CodexPigeon.app"
 system_app="/Applications/CodexPigeon.app"
 if [[ -w "/Applications" ]]; then
@@ -37,16 +42,16 @@ cat > "$desktop_launcher" <<EOF
 #!/usr/bin/env bash
 set -euo pipefail
 repo_root="$repo_root"
-electron_bin="\$repo_root/apps/desktop/node_modules/.bin/electron"
-main_entry="\$repo_root/apps/desktop/dist/electron/main/main.js"
+electron_native="$electron_native"
+main_entry="$main_entry"
 
-if [[ ! -x "\$electron_bin" || ! -f "\$main_entry" ]]; then
+if [[ ! -x "\$electron_native" || ! -f "\$main_entry" ]]; then
   cd "\$repo_root"
   exec "$pnpm_bin" --filter @codexpigeon/desktop dev:electron
 fi
 
 cd "\$repo_root"
-exec "\$electron_bin" "\$main_entry" "\$@"
+exec "\$electron_native" "\$main_entry" "\$@"
 EOF
 
 cat > "$cli_launcher" <<EOF
@@ -59,24 +64,49 @@ chmod +x "$desktop_launcher" "$cli_launcher"
 
 if command -v cc >/dev/null 2>&1; then
   launcher_source="$(mktemp "${TMPDIR:-/tmp}/codexpigeon-launcher.XXXXXX.c")"
-  launcher_target_escaped="$(printf "%s" "$desktop_launcher" | sed 's/\\/\\\\/g; s/"/\\"/g')"
+  launcher_log="$HOME/Library/Logs/CodexPigeon-launcher.log"
+  mkdir -p "$(dirname "$launcher_log")"
+  repo_root_escaped="$(printf "%s" "$repo_root" | sed 's/\\/\\\\/g; s/"/\\"/g')"
+  electron_native_escaped="$(printf "%s" "$electron_native" | sed 's/\\/\\\\/g; s/"/\\"/g')"
+  main_entry_escaped="$(printf "%s" "$main_entry" | sed 's/\\/\\\\/g; s/"/\\"/g')"
+  launcher_log_escaped="$(printf "%s" "$launcher_log" | sed 's/\\/\\\\/g; s/"/\\"/g')"
   cat > "$launcher_source" <<EOF
+#include <errno.h>
+#include <stdio.h>
+#include <string.h>
 #include <unistd.h>
 
 int main(void) {
-  char *const args[] = {"$launcher_target_escaped", 0};
+  const char *repo_root = "$repo_root_escaped";
+  const char *electron_native = "$electron_native_escaped";
+  const char *main_entry = "$main_entry_escaped";
+  const char *launcher_log = "$launcher_log_escaped";
+  char *const args[] = {(char *)electron_native, (char *)main_entry, 0};
+
+  if (chdir(repo_root) != 0) {
+    FILE *log = fopen(launcher_log, "a");
+    if (log != NULL) {
+      fprintf(log, "CodexPigeon launcher chdir failed: %s -> %s\n", repo_root, strerror(errno));
+      fclose(log);
+    }
+  }
   execv(args[0], args);
+  FILE *log = fopen(launcher_log, "a");
+  if (log != NULL) {
+    fprintf(log, "CodexPigeon launcher exec failed: %s %s -> %s\n", electron_native, main_entry, strerror(errno));
+    fclose(log);
+  }
   return 1;
 }
 EOF
   cc "$launcher_source" -o "$app_launcher"
   rm -f "$launcher_source"
 else
-  cat > "$home_app/Contents/MacOS/CodexPigeon" <<EOF
+  cat > "$app_launcher" <<EOF
 #!/usr/bin/env bash
 exec "$desktop_launcher" "\$@"
 EOF
-  chmod +x "$home_app/Contents/MacOS/CodexPigeon"
+  chmod +x "$app_launcher"
 fi
 
 cat > "$plist" <<EOF
