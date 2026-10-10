@@ -1,0 +1,7 @@
+INBOX.md
+OUTBOX.md
+RECEIPTS.md
+STATE.json
+HOOK_STATE.json
+*.lock
+*.tmp

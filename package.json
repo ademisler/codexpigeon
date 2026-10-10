@@ -1,0 +1,49 @@
+{
+  "name": "codexpigeon",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Non-interrupting mailbox companion for Codex threads and worktrees.",
+  "license": "MIT",
+  "type": "module",
+  "author": "Adem Isler",
+  "homepage": "https://github.com/ademisler/codexpigeon#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ademisler/codexpigeon.git"
+  },
+  "bugs": {
+    "url": "https://github.com/ademisler/codexpigeon/issues"
+  },
+  "keywords": [
+    "codex",
+    "codex-app",
+    "codex-desktop",
+    "mailbox",
+    "electron",
+    "macos",
+    "linux",
+    "agent-tools"
+  ],
+  "packageManager": "pnpm@11.1.2",
+  "scripts": {
+    "dev": "pnpm --filter @codexpigeon/desktop dev",
+    "build": "pnpm -r --sort build",
+    "typecheck": "pnpm -r --sort typecheck",
+    "test": "pnpm -r --if-present test",
+    "test:watch": "pnpm -r --if-present test:watch",
+    "lint": "pnpm -r --if-present lint",
+    "format": "prettier --write .",
+    "install:mac": "scripts/install-macos-local.sh",
+    "doctor": "pnpm --filter @codexpigeon/cli start -- doctor"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.21",
+    "dotenv": "^8.2.0",
+    "node-fetch": "^3.3.2",
+    "prettier": "^3.5.3",
+    "tsup": "^8.5.0",
+    "tsx": "^4.19.4",
+    "typescript": "^5.8.3",
+    "vitest": "^3.1.4"
+  }
+}

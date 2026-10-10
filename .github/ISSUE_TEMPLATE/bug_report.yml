@@ -1,0 +1,53 @@
+name: Bug Report
+description: Report a reproducible CodexPigeon problem.
+title: "[Bug]: "
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Please do not paste private Codex logs, mailbox files, credentials, or project data.
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: CodexPigeon version, commit, or branch.
+      placeholder: "0.1.0 / main / commit SHA"
+  - type: dropdown
+    id: platform
+    attributes:
+      label: Platform
+      options:
+        - macOS
+        - Linux
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: What happened?
+      description: Describe the issue and expected behavior.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Reproduction Steps
+      placeholder: |
+        1. Run ...
+        2. Open ...
+        3. See ...
+    validations:
+      required: true
+  - type: textarea
+    id: checks
+    attributes:
+      label: Local Checks
+      description: Paste non-sensitive output from relevant checks.
+      render: shell
+      placeholder: |
+        pnpm typecheck
+        pnpm test
+        pnpm build
